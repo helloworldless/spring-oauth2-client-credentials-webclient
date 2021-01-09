@@ -1,0 +1,22 @@
+spring:
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  security:
+    oauth2:
+      client:
+        registration:
+          my-client:
+            provider: my-client-provider
+            client-id: dummy-client-id
+            client-secret: dummy-client-secret
+            client-authentication-method: post
+            authorization-grant-type: client_credentials
+            scope: "*"
+            client-name: My Client
+        provider:
+          my-client-provider:
+            token-uri: http://localhost:8090/oauth/token
+
+secret-words-client:
+  url: https://dummy-secret-words-resource-server/api/words
