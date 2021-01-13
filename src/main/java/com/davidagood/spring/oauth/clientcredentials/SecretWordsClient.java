@@ -6,6 +6,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
 
@@ -26,18 +28,33 @@ public class SecretWordsClient {
 		this.config = config;
 	}
 
-	public List<String> getSecretWords() {
+	public List<String> getSecretWords() throws AuthorizationException {
 		var get = HttpMethod.GET;
 		var url = config.getUrl();
 		log.info("Making HTTP request method={}, url={}", get, url);
-		// @formatter:off
-		return webClient.method(get)
-				.uri(url)
-                .attributes(clientRegistrationId(REGISTRATION_ID))
-                .retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<String>>() {})
-                .block();
-        // @formatter:on
+		try {
+			// @formatter:off
+			return webClient.method(get)
+					.uri(url)
+					.attributes(clientRegistrationId(REGISTRATION_ID))
+					.retrieve()
+					.bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+					.block();
+			// @formatter:on
+		}
+		catch (WebClientResponseException.Unauthorized e) {
+			throw new AuthorizationException(e.getMessage());
+		}
+		catch (WebClientResponseException wcre) {
+			throw new SecretWordsRequestException(String.format(
+					"Secret words request failed; Request: method=%s, url=%s; Response: status=%s, body=%s; Error: %s",
+					get, url, wcre.getRawStatusCode(), wcre.getResponseBodyAsString(), wcre.getMessage()));
+		}
+		catch (WebClientException wce) {
+			throw new SecretWordsRequestException(String.format(
+					"Secret words request failed; Request: method=%s, url=%s Error: %s", get, url, wce.getMessage()));
+		}
+
 	}
 
 }

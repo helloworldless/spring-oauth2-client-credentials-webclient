@@ -2,9 +2,11 @@ package com.davidagood.spring.oauth.clientcredentials;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.function.Supplier;
@@ -27,7 +29,12 @@ public class Controller {
 	@GetMapping("/words")
 	public SecretWordsDto getSecretWords() {
 		log.info("Getting secret words");
-		return SecretWordsDto.from(secretWordsClient.getSecretWords(), timestampSupplier.get());
+		try {
+			return SecretWordsDto.from(secretWordsClient.getSecretWords(), timestampSupplier.get());
+		}
+		catch (AuthorizationException | SecretWordsRequestException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
 	}
 
 }
