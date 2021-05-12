@@ -1,4 +1,4 @@
-# Handling OAuth Client Credentials Authorization Transparently with Spring
+# Handling OAuth Client Credentials Authorization Transparently with Spring Security
 
 _Reference project demonstrating how to transparently handle OAuth2 Client Credentials authorization request when
 communicating from backend to backend, i.e. from client to resource server._
